@@ -1,0 +1,134 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace PrintASCII
+{
+    class PrintASCII
+    {
+        static void Main(string[] args)
+        {
+            while (true)
+            {
+                Stopwatch sw = Stopwatch.StartNew();
+
+                nthPrime();
+
+                Console.WriteLine("1 Operation >> {0} saniye sürdü", sw.ElapsedMilliseconds / 1000.0);
+
+                Console.ReadLine();
+
+                sw = Stopwatch.StartNew();
+
+                faceless();
+
+                Console.WriteLine("10 different >> {0} saniye sürdü", sw.ElapsedMilliseconds / 1000.0);
+
+                Console.ReadLine();
+
+
+            }
+        }
+
+        static void slardar()
+        {
+
+            Task[] workersname = new Task[40];
+            List<int> ips = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+            List<Task> dsa = new List<Task>();
+            for (int a = 0; a < 10; a++)
+            {
+
+                dsa.Add(Task.Run(() => api1(ips[a].ToString())));
+                dsa.Add(Task.Run(() => api2(ips[a].ToString())));
+                dsa.Add(Task.Run(() => api3(ips[a].ToString())));
+                dsa.Add(Task.Run(() => api4(ips[a].ToString())));
+
+                Console.WriteLine(a);
+
+            }
+
+            //await Task.WhenAll(dsa);
+
+            return;
+        }
+        static void faceless()
+        {
+
+            List<Thread> thList = new List<Thread>();
+
+            List<int> ips = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+            List<Task> dsa = new List<Task>();
+
+            for (int i = 0; i < 10; i++)
+            {
+                Thread th1 = new Thread(() => { api1(ips[i].ToString()); });
+                Thread th2 = new Thread(() => { api2(ips[i].ToString()); });
+                Thread th3 = new Thread(() => { api3(ips[i].ToString()); });
+                Thread th4 = new Thread(() => { api4(ips[i].ToString()); });
+
+                th1.Name = "SID" + ( i * 4 );
+                th1.Start();
+                thList.Add(th1);
+                Console.WriteLine(th1.Name + " ADDED");
+
+                th2.Name = "SID" + (i * 4 + 1);
+                th2.Start();
+                thList.Add(th2);
+                Console.WriteLine(th2.Name + " ADDED");
+
+                th3.Name = "SID" + (i * 4 + 2);
+                th3.Start();
+                thList.Add(th3);
+                Console.WriteLine(th3.Name + " ADDED");
+
+                th4.Name = "SID" + (i * 4 + 3);
+                th4.Start();
+                thList.Add(th4);
+                Console.WriteLine(th4.Name + " ADDED");
+
+                Console.WriteLine(i);
+            }
+
+            foreach (Thread th in thList)
+                th.Join();
+
+            //await Task.WhenAll(dsa
+            return;
+        }
+        static void nthPrime()
+        {
+            Thread.Sleep(2000);
+        }
+
+        static void api1(string high)
+        {
+            Thread.Sleep(2000);
+            Console.WriteLine("api1 for > " + high + ". IP" + " > DONE");
+        }
+        static void api2(string high)
+        {
+            Thread.Sleep(2000);
+
+            Console.WriteLine("api2 for > " + high + ". IP");
+        }
+        static void api3(string high)
+        {
+            Thread.Sleep(2000);
+
+            Console.WriteLine("api3 for > " + high + ". IP");
+        }
+        static void api4(string high)
+        {
+            Thread.Sleep(2000);
+
+            Console.WriteLine("api4 for > " + high + ". IP");
+        }
+
+    }
+
+}

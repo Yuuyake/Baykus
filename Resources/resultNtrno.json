@@ -1,0 +1,21 @@
+﻿{
+  "is-hijacked": false,
+  "is-spider": false,
+  "is-tor": false,
+  "is-dshield": false,
+  "is-vpn": false,
+  "ip": "1.1.1.1",
+  "is-spyware": false,
+  "is-spam-bot": false,
+  "blocklists": [
+    "proxy",
+    "bot"
+  ],
+  "last-seen": 1551331464,
+  "is-bot": true,
+  "list-count": 2,
+  "is-proxy": true,
+  "is-malware": false,
+  "is-listed": true,
+  "is-exploit-bot": false
+}

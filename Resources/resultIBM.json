@@ -1,0 +1,78 @@
+﻿{
+  "ip": "198.54.117.200",
+  "history": [
+    {
+      "created": "2018-07-20T15:22:00Z",
+      "reason": "Third party feed",
+      "asns": {
+        "22612": {
+          "Company": "NAMECHEAP-NET - Namecheap, Inc., US",
+          "cidr": 20
+        }
+      },
+      "geo": {
+        "country": "United States",
+        "countrycode": "US"
+      },
+      "ip": "198.54.117.200/32",
+      "cats": {
+        "Anonymisation Services": 43,
+        "Malware": 43,
+        "Botnet Command and Control Server": 43
+      },
+      "malware_extended": {
+        "CnC": "lokibot",
+        "cnc_country": 218,
+        "cnc_isnew": true,
+        "cnc_removed": "http_post"
+      },
+      "categoryDescriptions": {
+        "Anonymisation Services": "This category contains IP addresses of Web proxies (websites that allow the user to anonymously view websites). Furthermore, IP addresses are listed that can be used directly to surf anonymously (e.g. by adding them to the browser configuration).",
+        "Malware": "This category lists IPs of malicious websites or malware hosting websites.",
+        "Botnet Command and Control Server": "This category contains IP addresses that host a botnet command and control server."
+      },
+      "reasonDescription": "This data was imported from a third party feed.",
+      "score": 4.3
+    }
+  ],
+  "subnets": [
+    {
+      "created": "2017-10-18T06:23:00Z",
+      "reason": "Regional Internet Registry",
+      "asns": {
+        "22612": {
+          "Company": "NAMECHEAP-NET - Namecheap, Inc., US",
+          "cidr": 20
+        }
+      },
+      "geo": {
+        "country": "United States",
+        "countrycode": "US"
+      },
+      "ip": "198.54.112.0",
+      "categoryDescriptions": {},
+      "reasonDescription": "One of the five RIRs announced a (new) location mapping of the IP.",
+      "score": 1,
+      "cats": {},
+      "subnet": "198.54.112.0/20"
+    }
+  ],
+  "cats": {
+    "Anonymisation Services": 43,
+    "Malware": 43,
+    "Botnet Command and Control Server": 43
+  },
+  "geo": {
+    "country": "United States",
+    "countrycode": "US"
+  },
+  "score": 4.3,
+  "reason": "Third party feed",
+  "reasonDescription": "This data was imported from a third party feed.",
+  "categoryDescriptions": {
+    "Anonymisation Services": "This category contains IP addresses of Web proxies (websites that allow the user to anonymously view websites). Furthermore, IP addresses are listed that can be used directly to surf anonymously (e.g. by adding them to the browser configuration).",
+    "Malware": "This category lists IPs of malicious websites or malware hosting websites.",
+    "Botnet Command and Control Server": "This category contains IP addresses that host a botnet command and control server."
+  },
+  "tags": []
+}

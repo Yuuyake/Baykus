@@ -1,0 +1,19 @@
+﻿{
+    "query": "1.1.1.1",
+    "status": "success",
+    "country": "Australia",
+    "countryCode": "AU",
+    "region": "QLD",
+    "regionName": "Queensland",
+    "city": "South Brisbane",
+    "district": "",
+    "zip": "4101",
+    "lat": -27.4748,
+    "lon": 153.017,
+    "timezone": "Australia/Brisbane",
+    "isp": "Cloudflare, Inc.",
+    "org": "",
+    "as": "AS13335 Cloudflare, Inc.",
+    "mobile": false,
+    "proxy": false
+}

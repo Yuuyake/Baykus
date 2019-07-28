@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ADGroups.Properties {
+namespace BAYKUS.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace ADGroups.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ADGroups.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("BAYKUS.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -62,35 +62,26 @@ namespace ADGroups.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to 
-        ///  █████╗ ██████╗      ██████╗ ██████╗  ██████╗ ██╗   ██╗██████╗ ███████╗
-        /// ██╔══██╗██╔══██╗    ██╔════╝ ██╔══██╗██╔═══██╗██║   ██║██╔══██╗██╔════╝
-        /// ███████║██║  ██║    ██║  ███╗██████╔╝██║   ██║██║   ██║██████╔╝███████╗
-        /// ██╔══██║██║  ██║    ██║   ██║██╔══██╗██║   ██║██║   ██║██╔═══╝ ╚════██║
-        /// ██║  ██║██████╔╝    ╚██████╔╝██║  ██║╚██████╔╝╚██████╔╝██║     ███████║
-        /// ╚═╝  ╚═╝╚═════╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝  ╚═════╝ ╚═╝     ╚══════╝
-        /// _________________________________________________________________ [rest of string was truncated]&quot;;.
+        ///                                   ``ˀ&quot;:.     .     .:&quot;ˁ``               
+        ///                                     ϡ\&quot;;;˵\&quot;~^~&quot;/˶;;&quot;//               
+        ///                                      ϡ(  ʘ)\\|//(ʘ  )O               
+        ///                                      ϡ;;,,) \|/ (,,;;O               
+        ///                                     ϡOO/~/~).Y.(~\~\OOb               
+        ///                                    ϡ0b&quot;_._~     ~_._&apos;d0b               .
         /// </summary>
-        internal static string banner {
+        internal static string owlBanner {
             get {
-                return ResourceManager.GetString("banner", resourceCulture);
+                return ResourceManager.GetString("owlBanner", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
-        ///&lt;configuration&gt;
-        ///  &lt;!--====================================== configSections ============================================--&gt;
-        ///  &lt;configSections&gt;
-        ///    &lt;section name=&quot;log4net&quot; type=&quot;log4net.Config.Log4NetConfigurationSectionHandler, log4net&quot; /&gt;
-        ///  &lt;/configSections&gt;
-        ///  &lt;!--========================================= log4net =========================================--&gt;
-        ///
-        ///  &lt;log4net&gt;
-        ///    &lt;!--========================================= appender ============================== [rest of string was truncated]&quot;;.
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static string log4net {
+        internal static System.Drawing.Icon owlicon {
             get {
-                return ResourceManager.GetString("log4net", resourceCulture);
+                object obj = ResourceManager.GetObject("owlicon", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
             }
         }
     }
