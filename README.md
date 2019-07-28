@@ -1,8 +1,8 @@
-<img src="/owlicon2.ico" width="110" height="110"> 
+<img src="/Resources/owlicon.ico" width="110" height="110"> 
 
 ## BAYKUS is an IP analyzer by using 4 different resources asynchronously
 
-<img src="/ss.png" width="95%" height="95%" border="10">
+<img src="/Resources/ss.png" width="95%" height="95%" border="10">
 
 ### Markdown
 
