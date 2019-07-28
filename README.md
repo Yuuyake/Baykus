@@ -1,6 +1,8 @@
 <img src="/Resources/icon.ico" width="110" height="110"> 
 
-## BAYKUS is an IP analyzer by using 4 different resources asynchronously
+## Baykus IP Analyzer
+
+Gets infos about IPs by using 4 different resources asynchronously
 
 <img src="/Resources/ss.png" width="95%" height="95%" border="10">
 
