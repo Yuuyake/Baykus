@@ -1,4 +1,4 @@
-<img src="/Resources/icon.ico" width="110" height="110"> 
+<img src="/Resources/icon.ico" width="100" height="100"> 
 
 ## Baykus IP Analyzer
 
