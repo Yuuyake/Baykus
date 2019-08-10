@@ -1,4 +1,4 @@
-﻿/*
+/*
 |                                 ``\":.     .     .:"/``              
 | BAYKUS Reputation Reporter        \\";;;\"~^~"/;;;"//        
 |                                    O( (O)\\|//(O) )O       
@@ -6,13 +6,12 @@
 |                                   doO/~/~).Y.(~\~\OOb               
 |                                  dob"_._~     ~_._'d0b
 | Emre Ekinci                                     
-| yunusemrem@windowslive.com                                       
+| yunusemrem@windowslive.com	                   
 |                                      
-|        
 |      TODO:
+           > API keyleri ve validasyınu düzenle, Hash Checkerdaki gibi
            > rapor dosyasını plain table 3 yap
            > sonucu blissadmin kutucuğuna bas ( https://stackoverflow.com/questions/4015324/how-to-make-http-post-web-request  FLURRRR )
-           > rapora Scanning IP raporlarını da dahil et (PDF okuyarak )   
            > projeyi linuxta çalıştır
            > amblemi düzenle     
            > logger fonksiyonu ekle, herşey loglansın 
@@ -26,7 +25,6 @@ using System.Net;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
-using OfficeOpenXml;
 using System.Text;
 using System.Net.Http;
 using System.Json;
@@ -34,7 +32,6 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Drawing;
 using Console = Colorful.Console;
-using Colorful;
 using System.Security;
 
 namespace BAYKUS {
@@ -50,19 +47,22 @@ namespace BAYKUS {
         // ==========================================   MAIN FUNC  ===============================================
         //
         static void Main(string[] args) {
+
             string bannerFile = new string(' ', Console.LargestWindowWidth / 2) + 
-                String.Concat(Properties.Resources.owlBanner.Split('\n').Select(ss => ss = ss + new string(' ', Console.LargestWindowWidth / 2 - ss.Length) + '\n')).Replace("\r", "") + new string('─', Console.LargestWindowWidth / 2) + '\n';
+                String.Concat(Properties.Resources.owlBanner.Split('\n').Select(ss => ss = ss +
+                new string(' ', Console.LargestWindowWidth / 2 - ss.Length) + '\n')).Replace("\r", "") + new string('─', Console.LargestWindowWidth / 2) + '\n';
             Console.Title = "BAYKUS";
             Console.OutputEncoding = Encoding.UTF8;
             Console.ForegroundColor = Color.LightGray;
             Console.SetWindowSize(Console.LargestWindowWidth / 2, Console.LargestWindowHeight -1);
             Console.WriteFormatted(bannerFile, Color.WhiteSmoke);
 
-            Helpers.getApiKeys();
+            Helpers.setApiKeys();
             List<string> IPs = Helpers.getReportedIPs();// read reported IPs from csv
             myProxySetting = initializeProxyConfigs();
             AsyncRequests(IPs);                         // this will make all needed requests from all APIs asynchronously
             Helpers.writeRowsToExcel(rows);             // responses wrote to the rows List variable, write them to report excel
+            Helpers.WriteSomeMail(rows);
             Console.ReadLine();
         }
         // ========================================   Network Configs  ===========================================
@@ -80,13 +80,13 @@ namespace BAYKUS {
             }
             else {
                 Console.Write("\n │\t├─ !No proxy detected.\n\t");
-                Console.Write("Setting proxy to \"YOUR GATEWAY\"");
+                Console.Write("Setting proxy to \"YOUR_PROXY_ADDRESS\"");
                 //System.Environment.Exit(1);
-                myProxySetting.Address = new Uri("YOUR GATEWAY");
+                myProxySetting.Address = new Uri("YOUR_PROXY_ADDRESS");
             }
             // Setting User Creds to pass proxy
             string userName = System.Security.Principal.WindowsIdentity.GetCurrent().Name.Split('\\')[1];
-            userName = userName.Length < 3 || userName.Length > 10 || (!userName.Contains("P") && !userName.Contains("p")) == true ? "unknown" : userName;
+            userName = userName.Length < 3 || userName.Length > 10 == true ? "unknown" : userName;
 
             Console.Write("\n │\t├─ Username: {0}", userName);
             SecureString securePwd = new SecureString();
@@ -109,14 +109,14 @@ namespace BAYKUS {
         //
 
         static void AsyncRequests(List<string> IPs) {
-
             for (int i = 0; i < IPs.Count; i++) { printers.Add(new List<string>() {IPs[i]});}
             int counter = 0;
             List<Task> allReq = new List<Task>();
             foreach (string IP in IPs) {
                 int[] ipParts = IP.Split(new String[] { "." }, StringSplitOptions.RemoveEmptyEntries).Select(s => int.Parse(s)).ToArray();
                 // in private ip range
-                if (ipParts[0] == 10 
+                if (
+                    ipParts[0] == 10 
                     || (ipParts[0] == 192 && ipParts[1] == 168) 
                     || (ipParts[0] == 172 && (ipParts[1] >= 16 && ipParts[1] <= 31))) 
                 {
@@ -128,6 +128,7 @@ namespace BAYKUS {
                 var eachTask = Task.Factory.StartNew(() => oneIpRequests(IP, myC));
                 allReq.Add(eachTask);
                 counter++;
+                Thread.Sleep(500);
             }
             Task.WaitAll(allReq.ToArray());
             Console.Write("\n │\n │ DONE _____________________________________________");
@@ -268,15 +269,15 @@ namespace BAYKUS {
             string loc = "?";
             string score = "?";
             List<string> tempRow = new List<string>();
-            while (currKeyCounter < MTAPI.Count) {
-                if (MTAPI[currKeyCounter].state == false) {
+            while (currKeyCounter < IBMAPI.Count) {
+                if (IBMAPI[currKeyCounter].state == false) {
                     currKeyCounter++;
                     continue;
                 }
                 try {   // create request , read response
                     HttpWebRequest requestIBM = (HttpWebRequest)WebRequest.Create("https://api.xforce.ibmcloud.com/ipr/" + IP);
                     requestIBM.Proxy = myProxySetting;
-                    string apicreds = IBMAPI[0].id + ":" + IBMAPI[currKeyCounter].pass;
+                    string apicreds = IBMAPI[currKeyCounter].id + ":" + IBMAPI[currKeyCounter].pass;
                     requestIBM.Headers.Add("Authorization", "Basic " + System.Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(apicreds)));
                     using (HttpWebResponse response = (HttpWebResponse)requestIBM.GetResponse()) {
                         using (Stream stream = response.GetResponseStream())
@@ -330,7 +331,7 @@ namespace BAYKUS {
                     catch (Exception e) {
                         printers[counter].Add(Helpers.printBad(apiname, "exception when parsing", e.Message));
                         if (e.Message.Contains("Forbidden")) {
-                            MTAPI[currKeyCounter].state = false;
+                            IBMAPI[currKeyCounter].state = false;
                             continue;
                         }
                     }
