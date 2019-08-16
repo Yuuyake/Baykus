@@ -3,7 +3,7 @@
 ## Baykus 
 IP Analyzer
 
-Gets informations about IPs by using 4 different resources asynchronously
+  > Gets informations about IPs by using 4 different resources asynchronously
 
 <img src="/Resources/ss.png" width="95%" height="95%" border="10">
 
