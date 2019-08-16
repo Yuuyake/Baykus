@@ -1,6 +1,7 @@
-<img src="/Resources/owlicon.ico" width="100" height="100"> 
+<img align="left" src="/Resources/owlicon.ico" width="100" height="100"> 
 
-## Baykus IP Analyzer
+## Baykus 
+IP Analyzer
 
 Gets informations about IPs by using 4 different resources asynchronously
 
