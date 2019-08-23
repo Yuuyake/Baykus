@@ -1,0 +1,26 @@
+﻿{
+  "proxyAdress": "YOUR_GATEWAY_URL:PORT",
+  "proxyUsername": "xaxaxaxa",
+  "proxyPassword": "nononononono",
+  "csirtMail": "csirtMail@bb.com",
+  "altyapiMail": "altyapiMail@bb.com",
+  "atarMail": "atarMail@bb.com",
+  "ibmApiKeys": [
+    {
+      "id": "3c765336-549c-4fc8-966f-0fdb44c15c90", 
+      "pass": "79bfd4cf-d7da-4f1f-a9e5-663cfca1b4be"
+    }
+  ],
+  "ntApiKeys": [
+    {
+      "id": "some",
+      "pass": "1LYwU0hYYcne9zUIpiqtCHQCsxwi1Pkjp24WStVvxHqvAGTv"
+    }
+  ],
+    "mtApiKeys": [
+    {
+      "id": "1",
+      "pass": "38332de852a8f329212b8f4575b9a766"
+    }
+  ]
+}
