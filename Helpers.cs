@@ -1,25 +1,21 @@
 ﻿using OfficeOpenXml;
+using OutlookApp = Microsoft.Office.Interop.Outlook;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Console = Colorful.Console;
 using Colorful;
+using BAYKUS.Properties;
+using Microsoft.Office.Interop.Outlook;
+using OApp = Microsoft.Office.Interop.Outlook.Application;
 
 namespace BAYKUS {
-    public class APIPAIR {
-        public string id;
-        public string pass;
-        public bool state;
-        public APIPAIR(string _id, string _pass,bool _state) { id = _id; pass = _pass; state = _state; }
-    }
     class Helpers {
         // ========================================   Miscellaneous Functions  ==================================
         //
@@ -112,9 +108,11 @@ namespace BAYKUS {
         /// </summary>
         /// <returns></returns>
         public static List<string> getReportedIPs() {
+            // get ip from Acunn,Scanning,TXT ayrı ayrı fonksiyon burda her birinin try catch i olsun
+            // get ip from Acunn,Scanning,TXT ayrı ayrı fonksiyon burda her birinin try catch i olsun
+            // get ip from Acunn,Scanning,TXT ayrı ayrı fonksiyon burda her birinin try catch i olsun
             List<string> IPs = new List<string>();
             List<string> files = Directory.GetFiles(Directory.GetCurrentDirectory()).ToList();
-
             foreach (var file in files) {
                 var reportType = "";
                 var fileName = file.Split('\\').Last();
@@ -158,7 +156,7 @@ namespace BAYKUS {
                         }
                     }
                 }//try
-                catch (Exception e) {
+                catch (System.Exception e) {
                     Console.WriteFormatted("\n\t│ Exception: " + e.Message, red);
                     Console.WriteFormatted("\n\t│ Maybe content is deformed.", red, red, fileName);
                     Console.Write("\n\t│ Press enter to continue...");
@@ -171,27 +169,18 @@ namespace BAYKUS {
         // <summary>
         /// stores current api keys to proper api key holders
         /// </summary>
-        static public void getApiKeys() {
+        static public void SetApiKeys() {
             //static string HYBRID_API_KEY = "soscsgcok4ocks8c8kw40cck40g4wgkcwcsk48c00g4ksw4cgoc448sko4w04gsg";
-            acun.IBMAPI= new List<APIPAIR>() {
-                new APIPAIR("3c765336-549c-4fc8-966f-0fdb44c15c90", "79bfd4cf-d7da-4f1f-a9e5-663cfca1b4be",true),
-                new APIPAIR("45649254-91b6-4499-acd4-590e383a2198", "0eaa4f04-61c7-4b82-ae6a-d471d5c723c6",true),
-                new APIPAIR("3efae175-b5cb-4cbd-95b7-085ed9bcd893", "e3a895a9-d9fc-4ca3-a193-32739c303411",true)
-            };
-            acun.NTAPI = new List<APIPAIR>() {
-                new APIPAIR("some", "1LYwU0hYYcne9zUIpiqtCHQCsxwi1Pkjp24WStVvxHqvAGTv",true),
-                new APIPAIR("Emre", "Qta6LrQWErRlzu7HLuS6tEFEpLlzaBm0T39KwZ82fpWgoKMD",true),
-                new APIPAIR("emre3","wlrj6Q3AjGYeqjmYaBc7edxt3AymZhM3fKSYKyJ828Xe8ZI4",true),
-                new APIPAIR("emrez","pKdPCww5v9cNpf0noySA1BTwVKbSVsYmxbLNNSi3zam9RXId",true),
-                new APIPAIR("emre4","8W5cB22t9rCbz5Eod2jtIC255S4F0SxyTOUFNdPGl3zpMtgz",true),
-                new APIPAIR("emre5","pgKZ4aZOc0r2gzw7UuuXkenCtMmFCDwEy7aNSFqqAi9U372r",true),
-                new APIPAIR("emre6","6Ol3QNmxShwYwCN7z7eqbIeex2S5HcHrYvt4nmy3AgCG9v7t",true)
-            };
-            acun.MTAPI = new List<APIPAIR>() {
-                new APIPAIR("1", "38332de852a8f329212b8f4575b9a766",true),
-                new APIPAIR("2", "aa4704f20eea43fd4adf47067fd699b8",true),
-                new APIPAIR("3", "eda4cb11fc19a4f06d33099e16c1d9f9",true)
-            };
+            int counter = 0;
+
+            var strkeys = MainClass.speconfig.ibmApiKeys;
+            strkeys.ForEach(kk => MainClass.ibmApiKeys.Add(new ApiKey(kk.id, kk.pass,counter,"available")));
+
+            strkeys = MainClass.speconfig.ntApiKeys;
+            strkeys.ForEach(kk => MainClass.ntApiKeys.Add(new ApiKey(kk.id, kk.pass, counter, "available")));
+
+            strkeys = MainClass.speconfig.mtApiKeys;
+            strkeys.ForEach(kk => MainClass.mtApiKeys.Add(new ApiKey(kk.id, kk.pass, counter, "available")));
         }
         /// <summary>
         /// 
@@ -213,7 +202,7 @@ namespace BAYKUS {
                     counter++;
                 }
             }
-            catch (Exception e) {
+            catch (System.Exception e) {
                 Console.WriteFormatted("\n\t│ Exception: " + e.Message, red);
                 return new List<string>() { };
             }
@@ -297,58 +286,127 @@ namespace BAYKUS {
                 else {
                     Console.Write("\n │ !System has not excel installed. \n │\t├─ Writing to txt ... ");
                     foreach (List<string> row in orderedRows) {
-                        File.WriteAllText(@"C:\Users\P31908\Desktop\result.txt", String.Join(", ", row.ToArray()));
+                        File.WriteAllText(@".\result.txt", String.Join(", ", row.ToArray()));
                         counter++;
                     }
                     Console.Write("\n │\t├─ Writing to txt DONE [{0} record is written]", counter - 3);
                 }
             }
-            catch (Exception e) {
+            catch (System.Exception e) {
                 Console.WriteFormatted("\n │ !!! EXCEPTION while writing to excel: " +  e.Message, red);
             }
         }
-    }
-}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="rows"></param>
+        static public void WriteSomeMail(List<List<string>> rows) {
+            var orderedRows = rows.OrderBy(ss => ss[5]).ToList();
+            var resultTable = "";
+            try {
+                //string headerSpan = @"<p class=MsoNormal><span style='font-size:12.0pt;font-family:Consolas;color:blue;mso-fareast-language:TR'>";
+                string tableHeader = Resources.tableHeader.Replace("01.08.19 - 11:07", DateTime.Now.ToString("dd/MM/yy - HH:mm"));
+                List <string> excelRows = new List<string>();
+                foreach (List<string> row in orderedRows) {
+                    var rowData = "";
+                    foreach (string data in row) {
+                        int i = row.FindIndex(rr => rr == data);
+                        if (i == 0 || i == 3 || i == 5 || i == 7){
+                            rowData +=
+                                @"<td width=130 nowrap valign=bottom style='width:97.75pt;border:none;border-right:2px solid;height:15.0pt'>
+                                <p class=MsoNormal><span style='font-family:Calibri;mso-fareast-language:TR'>" + data + @"<o:p></o:p></span></p></td>";
+                        }
+                        else
+                            rowData +=
+                                @"<td width=130 nowrap valign=bottom style='width:97.75pt;border:none;height:15.0pt'>
+                                <p class=MsoNormal><span style='font-family:Calibri;mso-fareast-language:TR'>" + data + @"<o:p></o:p></span></p></td>";
+                    }
+                    excelRows.Add("<tr style='mso-yfti-irow:2;height:15.0pt'> " + rowData + "</tr>");
+                }
+                resultTable = tableHeader + String.Join("", excelRows) + "</table>";
+            }
+            catch (System.Exception ee) {
+                Console.Write("\n Creating table for mailing is failed . . . ", Color.Red);
+                Console.Write("\n Exception: " + ee.Message, Color.Orange);
+                resultTable = "No Table Created";
+            }
+            OutlookApp.Application OutApp  = new OutlookApp.Application();
+            OutlookApp.MailItem mailItem = (OutlookApp.MailItem)OutApp.CreateItem(OutlookApp.OlItemType.olMailItem);
+            mailItem.Importance = OutlookApp.OlImportance.olImportanceHigh;
+            mailItem.Subject = "Scanning IP Addresses";
+            // "pre" tag is standing for render as it is dont change anything, thats why we cannot tab on there
+            mailItem.HTMLBody =
+"<pre " + "style=\"font-family:'Arial TUR'\" >" +
+@"Merhaba,<br/>
+Ekteki Scanning IP raporlarına istinaden aşağıdaki <strong style='color:red;'>kırmızı olmayan IP'lerin</strong> erişimi blissadmin ile kesilmiştir.<br/>
+Syg.<br/>
+" + resultTable + "</pre>";
 
-/* here, trying to make request with OOP methods, but aborted bc of i see no advantage
-public class makeRequest {
-    List<string> rowList = new List<string>();
-    WebProxy myProxySetting;
-    string apiName;
-    string apiAddress;
-    string IP;
-
-    public makeRequest(string _apiName, WebProxy _proxySettings, string _IP) {
-        apiName = _apiName;
-        myProxySetting = _proxySettings;
-        IP = _IP;
-        switch (apiName) {
-            case "ipapi":
-                apiAddress = "https://ipapi.co/" + IP + "/json/";
-                Console.WriteLine("ipapi 1");
-                break;
-            case "ip_api":
-                apiAddress = "http://ip-api.com/json/" + IP;
-                Console.WriteLine("ip_api 2");
-                break;
-            case "metadefender":
-                apiAddress = "http://api.metadefender.com/v1/scan/" + IP;
-                Console.WriteLine("metadefender 3");
-                break;
-            case "ibm":
-                apiAddress = "https://api.xforce.ibmcloud.com/ipr/" + IP;
-                Console.WriteLine("ibm 4");
-                break;
-            case "neutrino":
-                apiAddress = "https://neutrinoapi.com/ip-blocklist";
-                Console.WriteLine("neutrino 5");
-                break;
-            default:
-                Console.WriteLine("\t!!! NO CHOOSEN API ");
-                break;
+            mailItem.To = MainClass.speconfig.csirtMail + "," + MainClass.speconfig.altyapiMail;
+            //mailItem.CC = MainClass.speconfig.atarMail;
+            var attachFiles = Directory.GetFiles(Directory.GetCurrentDirectory()).
+                Where(ff => ff.Contains("Scanning IP Addresses") || ff.Contains("Acunn666")).ToList();
+            if (attachFiles.Where(ff => !File.Exists(ff)).Count() > 0 )
+                Console.Write("\nSome of the Attached documents( " + String.Join(",",attachFiles.Where(ff => !File.Exists(ff))) + " ) are missing", Color.Red);
+            else {
+                System.Net.Mail.Attachment attachment;
+                foreach ( string att in attachFiles) {
+                    attachment = new System.Net.Mail.Attachment(att);
+                    mailItem.Attachments.Add(att, OlAttachmentType.olByValue, Type.Missing, Type.Missing);
+                }
+            }
+            mailItem.Display();
         }
-        doRequest();
+        static public void WriteAtarMail(List<List<string>> rows) {
+            var orderedRows = rows.OrderBy(ss => ss[5]).ToList();
+            // finally, write rows list to Excel's rows 
+            foreach (List<string> row in orderedRows) {
+            }
+            string mailBody = String.Join("", orderedRows.Select(rr => rr[0] + "<br/>"));
+            OApp outlookApp = new OApp();
+            MailItem mailItem = outlookApp.CreateItem(OlItemType.olMailItem);
+            mailItem.To = MainClass.speconfig.atarMail;
+            mailItem.CC = MainClass.speconfig.csirtMail;
+            mailItem.Subject = MainClass.speconfig.atarTitle + MainClass.userName + "_" + DateTime.Now.ToString("ddMMMMyyyy");
+            mailItem.HTMLBody = "<p style=\"font-family:'consolas'\" >" + mailBody + "</p>";
+            mailItem.Importance = OlImportance.olImportanceHigh;
+            mailItem.Display();
+        }
+        /*
+        /// <summary>
+        /// executes to login operation for the login page
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <param name="tabs"></param>
+        public void OpenLogInPage() {
+            try {
+                Driver.ffoxDriver.ExecuteJS("window.open('" + this.mainPage + "')");
+                var tabs = Driver.ffoxDriver.WindowHandles;
+                Driver.ffoxDriver.SwitchTo().Window(tabs[++(Driver.currTab)]);
+                Driver.ffoxDriver.ExecuteJS("window.open('" + this.mainPage + "')");
+                tabID = Driver.ffoxDriver.CurrentWindowHandle;
+                Console.WriteLineFormatted("\t > DONE: " + this.mainPage, Color.Green);
+            }
+            catch (Exception ee) {
+                Console.WriteLineFormatted("\t > Exception: Page " + this.mainPage + " is problematic . . .", Color.Red);
+                var error = ee.Message;
+                Console.WriteLineFormatted("\t\t> " + error, Color.Orange);
+            }
+            Thread.Sleep(500);
+        }
+            try {
+                Driver.ffoxDriver.SwitchTo().Window(this.tabID);
+                Driver.ffoxDriver.FindElement(By.XPath("//*[@id=\"userName-input\"]")).SendKeys(username);
+                Driver.ffoxDriver.FindElement(By.XPath("//*[@id=\"password-input\"]")).SendKeys(new System.Net.NetworkCredential(string.Empty, password).Password);
+                Driver.ffoxDriver.FindElement(By.XPath("//*[@type=\"button\"]")).Click();
+                Console.WriteLineFormatted("\t > DONE: " + this.mainPage, Color.Green);
+            }
+            catch (Exception ee) {
+                Console.WriteLineFormatted("\t > Exception: Page " + this.mainPage + " is problematic . . .", Color.Red);
+                var error = ee.Message;
+                Console.WriteLineFormatted("\t\t> " + error, Color.Orange);
+            }
+        }*/
     }
-    public List<string> doRequest() { return rowList; }
 }
-*/
