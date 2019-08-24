@@ -13,7 +13,7 @@ namespace Baykus
         public bool isCompleted;
         public string ip;
         public List<string> ibmResult;   // error,country,asn,severity
-        public List<string> ipapiResult; // error,country,org,"NA"
+        public List<string> ip_apiResult;// error,country,org,"NA"
         public List<string> mdResult;    // error,blacklist,"NA","NA"
         public List<string> ntResult;    // error,blocklist,"NA","NA"
 
@@ -36,9 +36,35 @@ namespace Baykus
         {
             throw new NotImplementedException();
         }
-        private List<string> ResolveIpapiData(string ipapiRaw)
+        private List<string> ResolveIp_apiData(string ipapiRaw)
         {
-            throw new NotImplementedException();
+            // FINDDDDDDDDDDD   error, country, org
+            string country  = "NA";
+            string asn      = "NA";
+            string severity = "NA";
+            string error    = "NA";
+            string apiName  = "ip-api";
+            if (ipapiRaw.Contains("error"))
+                MainClass.printers[orderNo].Add(Helpers.printBad(apiName, "error", ipapiRaw));
+            else if (ipapiRaw == null)
+                MainClass.printers[orderNo].Add(Helpers.printBad(apiName, "null returned", ipapiRaw));
+            else
+            {
+                try
+                {
+                    // process the response if no failure exists
+                    dynamic retIP_APIjson = JsonConvert.DeserializeObject(ipapiRaw);
+                    // add values to row > country+region,organization
+                    tempRow.Add(retIP_APIjson.isp.ToString());
+                    tempRow.Add(retIP_APIjson.country.ToString() + ", " + retIP_APIjson.countryCode.ToString());
+                    MainClass.printers[orderNo].Add(Helpers.printOk(apiName));
+                    return tempRow;
+                }
+                catch (Exception e) {
+                    MainClass.printers[orderNo].Add(Helpers.printBad(apiName, "exception when parsing", e.Message));
+                }
+            }
+            return new List<string>() { error, country, asn, severity }; // if any fail happens, instruction comes to here to return properly
         }
         /// <summary>
         /// returns 4 sized string list: country,asn(organization),severity,error

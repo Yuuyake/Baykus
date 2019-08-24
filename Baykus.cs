@@ -163,9 +163,9 @@ namespace Baykus {
             //get api RESPONSES from requests asynchronous, choose whatever  
             //var taskIPAPI = Task.Run(() => rawIpapi  = makeRequestIpapi(IP,counter));
             var taskIP_API = Task.Run(() => rawIp_api = makeRequestIp_api(ip, counter));
-            var taskIBM    = Task.Run(() => rawIbm = makeRequestIBM(ip, counter));
-            var taskMD     = Task.Run(() => rawMd = makeRequestMDef(ip, counter));
-            var taskNTRNO  = Task.Run(() => rawNt = makeRequestNtrno(ip, counter));
+            var taskIBM    = Task.Run(() => rawIbm    = makeRequestIBM(ip, counter));
+            var taskMD     = Task.Run(() => rawMd     = makeRequestMDef(ip, counter));
+            var taskNTRNO  = Task.Run(() => rawNt     = makeRequestNtrno(ip, counter));
 
             // await makes execution block for further lines
             Task.WaitAll(taskIBM, taskNTRNO, taskMD, taskIP_API);
@@ -178,6 +178,7 @@ namespace Baykus {
                 //select one of the other IP location API, if the one fails go for the other. 
                 Helpers.printStat(printers[counter], counter);
             }
+            return tResult;
         }
         /// <summary>
         /// see\Resources\resultIp_api.json
@@ -185,11 +186,10 @@ namespace Baykus {
         /// <param name="IP"></param>
         /// <param name="counter"></param>
         /// <returns></returns>
-        static List<string> makeRequestIp_api(string IP, int counter) {
-            Result tResult = new Result(counter,IP);
+        static string makeRequestIp_api(string IP, int counter) {
             string apiName = "ip-api";
             List<string> tempRow = new List<string>();
-            string responseIP_API = "";
+            string responseIP_API = "NA";
             try {   // create request , read response
                 HttpWebRequest requestIP_API = (HttpWebRequest)WebRequest.Create("http://ip-api.com/json/" + IP);
                 requestIP_API.Proxy = myProxySetting;
@@ -199,34 +199,16 @@ namespace Baykus {
             }
             catch (Exception e) {
                 if (e.Message.Contains("Proxy Authentication Required"))
-                    return new List<string>() { "FailProxyPass", "?" }; // with this return value checked, blocks this app to continue 
+                    return responseIP_API; // with this return value checked, blocks this app to continue 
                 else {
                     printers[counter].Add(Helpers.printBad(apiName, "exception", e.Message));
                     if (e.Message.Contains("Forbidden")) {
-                        return new List<string>() { "KeyLimit", "KeyLimit" };
+                        DUZENLEEEEEEEEEE
+                        return responseIP_API;
                     }
-                    return new List<string>() { "?", "?" };
                 }
             }
-            if (responseIP_API.Contains("error"))
-                printers[counter].Add(Helpers.printBad(apiName, "error", responseIP_API.ToString()));
-            else if (responseIP_API == null)
-                printers[counter].Add(Helpers.printBad(apiName, "null returned", responseIP_API.ToString()));
-            else {
-                try {
-                    // process the response if no failure exists
-                    dynamic retIP_APIjson = JsonConvert.DeserializeObject(responseIP_API);
-                    // add values to row > country+region,organization
-                    tempRow.Add(retIP_APIjson.isp.ToString());
-                    tempRow.Add(retIP_APIjson.country.ToString() + ", " + retIP_APIjson.countryCode.ToString());
-                    printers[counter].Add(Helpers.printOk(apiName));
-                    return tempRow;
-                }
-                catch (Exception e) {
-                    printers[counter].Add(Helpers.printBad(apiName, "exception when parsing", e.Message));
-                }
-            }
-            return new List<string>() { "?", "?" }; // if any fail happens, instruction comes to here to return properly
+            return responseIP_API;
         }
         /// <summary>
         /// see\Resources\resultIpapi.json
@@ -277,10 +259,7 @@ namespace Baykus {
         /// <returns></returns>
         static string makeRequestIBM(string IP, int counter) {
             int currKeyCounter = 0;
-            string apiName = "ibm-xforce";
             string responseIBM = "";
-            string loc = "?";
-            string score = "?";
             List<string> tempRow = new List<string>();
             while (currKeyCounter < ibmApiKeys.Count) {
                 if (ibmApiKeys[currKeyCounter].state == "KeyLimit") {
@@ -303,11 +282,12 @@ namespace Baykus {
                     }
                 }
                 catch (Exception e) {
-                    printers[counter].Add(Helpers.printBad(apiName, "exception", e.Message));
+                    printers[counter].Add(Helpers.printBad("ibm-xforce", "exception", e.Message));
                 }
                 /////////////
                 return responseIBM;
             }
+            return responseIBM;
         }
         /// <summary>
         /// see\Resources\resultMD.json
