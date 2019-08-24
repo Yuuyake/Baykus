@@ -2,7 +2,8 @@
 using System.Linq;
 using System.Text;
 
-namespace BAYKUS {
+namespace Baykus
+{
     public class ApiKey {
         public string id;
         public string pass;

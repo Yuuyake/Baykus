@@ -1,5 +1,6 @@
 ﻿using OfficeOpenXml;
-using OutlookApp = Microsoft.Office.Interop.Outlook;
+using Outlook = Microsoft.Office.Interop.Outlook;
+using ExcelApp = Microsoft.Office.Interop.Excel;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -11,11 +12,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Console = Colorful.Console;
 using Colorful;
-using BAYKUS.Properties;
+using Baykus.Properties;
 using Microsoft.Office.Interop.Outlook;
-using OApp = Microsoft.Office.Interop.Outlook.Application;
 
-namespace BAYKUS {
+namespace Baykus
+{
     class Helpers {
         // ========================================   Miscellaneous Functions  ==================================
         //
@@ -50,14 +51,11 @@ namespace BAYKUS {
             } while (true);
             return securePwd;
         }
-        static public string base64Encode(string plainText) {
-            var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
-            return System.Convert.ToBase64String(plainTextBytes);
-        }
-        static public string base64Decode(string base64EncodedData) {
-            var base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData);
-            return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
-        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="stats"></param>
+        /// <param name="counter"></param>
         static public void printStat(List<string> stats,int counter) {
             for (int i = 0; i < stats.Count; i++) {
                 if (i == 0) {
@@ -73,10 +71,22 @@ namespace BAYKUS {
                 }
             }
         }
-        static public string printOK(string apiName) { // to edit easier because of it is printed many time 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="apiName"></param>
+        /// <returns></returns>
+        static public string printOk(string apiName) { // to edit easier because of it is printed many time 
             //Console.WriteFormatted("\n │\t├─ " + apiName + " OK", Color.Green);
             return "\n │\t├─ " + apiName + " OK";
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="api"></param>
+        /// <param name="problem"></param>
+        /// <param name="msg"></param>
+        /// <returns></returns>
         static public string printBad(string api, string problem, string msg) { // to edit easier because of it is printed many time 
             //Console.WriteFormatted("\n │\t├─ !" + api + " bad " + problem + ": " + msg, green);
             return "\n │\t├─ !" + api + " bad " + problem + ": " + msg;
@@ -227,27 +237,15 @@ namespace BAYKUS {
         /// 
         /// </summary>
         /// <param name="rows"></param>
-        public static void writeRowsToExcel(List<List<string>> rows) {
+        public static void writeRowsToExcel(List<Result> results) {
             int counter = 3; // counter for rows
-            var orderedRows = rows.OrderBy(ss => ss[5]).ToList();
             try {
                 if (Type.GetTypeFromProgID("Excel.Application") != null) {
                     Console.Write("\n\n │ System has excel installed.");
                     Console.Write("\n │\t├─ >> Writing responses to excel ...");
                     using (ExcelPackage excel = new ExcelPackage()) {
-                        var headerRow = new List<string[]>() { };
-                        headerRow.Add(new string[] {
-                            DateTime.Now.ToString("dd/MM/yy - HH:mm"),
-                            "IBM-XFORCE",
-                            " ",
-                            " ",
-                            "IPAPI",
-                            " ",
-                            "METADEFENDER",
-                            "NEUTRINO"
-                        });
-                        var headerRow2 = new List<string[]>() { };
-                        headerRow2.Add(new string[] {
+                        var headerRow = new List<string[]>() { new string[] { DateTime.Now.ToString("dd/MM/yy - HH:mm"), "IBM-XFORCE", " ", " ", "IPAPI", " ", "METADEFENDER", "NEUTRINO" } };
+                        var headerRow2 = new List<string[]>() { new string[] {
                             "IP",
                             "IBM-Country",
                             "ASN",
@@ -256,7 +254,8 @@ namespace BAYKUS {
                             "IPapi-Country",
                             "Blacklisted",
                             "Blocklisted"
-                        });
+                            }
+                        };
                         // Determine the header range to write over it (e.g. A1:D1)
                         string headerRange = "A1:H1";
                         string headerRange2 = "A2:H2";
@@ -267,14 +266,15 @@ namespace BAYKUS {
                         worksheet.Cells[headerRange].LoadFromArrays(headerRow);
                         worksheet.Cells[headerRange].Style.Font.Size = 12;
                         worksheet.Cells[headerRange].Style.Font.Color.SetColor(System.Drawing.Color.Blue);
+
                         worksheet.Cells[headerRange2].LoadFromArrays(headerRow2);
                         worksheet.Cells[headerRange2].Style.Font.Bold = true;
                         worksheet.Cells[headerRange2].Style.Font.Size = 12;
                         worksheet.Cells[headerRange2].Style.Font.Color.SetColor(System.Drawing.Color.Blue);
                         // finally, write rows list to Excel's rows 
-                        foreach (List<string> row in orderedRows) {
-                            worksheet.Cells["A" + counter + ":H" + counter].LoadFromArrays(new List<string[]>() { row.ToArray() });
-                            Console.Write("\n │\t\t├─ [{0}] {1} {2}", counter, row[0], row[1]);
+                        foreach (Result result in results) {
+                            worksheet.Cells["A" + counter + ":H" + counter].LoadFromArrays(new List<string[]>() { result.ToArray() });
+                            Console.Write("\n │\t\t├─ " + result.ToString());
                             counter++;
                         }
                         File.Delete(outputFileName); // Delete previously created results
@@ -285,62 +285,57 @@ namespace BAYKUS {
                 }
                 else {
                     Console.Write("\n │ !System has not excel installed. \n │\t├─ Writing to txt ... ");
-                    foreach (List<string> row in orderedRows) {
-                        File.WriteAllText(@".\result.txt", String.Join(", ", row.ToArray()));
-                        counter++;
-                    }
-                    Console.Write("\n │\t├─ Writing to txt DONE [{0} record is written]", counter - 3);
+                    results.ForEach(rr => File.WriteAllText(@".\result.txt", rr.ToString() + Environment.NewLine));
+                    Console.Write("\n │\t├─ Writing to txt DONE [{0} record is written]", results.Count);
                 }
             }
             catch (System.Exception e) {
                 Console.WriteFormatted("\n │ !!! EXCEPTION while writing to excel: " +  e.Message, red);
             }
         }
+        static public string base64Encode(string plainText)
+        {
+            var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
+            return System.Convert.ToBase64String(plainTextBytes);
+        }
+        static public string base64Decode(string base64EncodedData)
+        {
+            var base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData);
+            return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
+        }
         /// <summary>
         /// 
         /// </summary>
         /// <param name="rows"></param>
-        static public void WriteSomeMail(List<List<string>> rows) {
-            var orderedRows = rows.OrderBy(ss => ss[5]).ToList();
-            var resultTable = "";
+        static public void WriteSomeMail(List<Result> results) {
+            var resultTable = "NA";
+            var cellProperty = @"<td width=130 nowrap valign=bottom style='width:97.75pt;border:none;height:15.0pt'>
+                                 <p class=MsoNormal><span style='font-family:Calibri;mso-fareast-language:TR'>";
+            var cellEnd = @"<o:p></o:p></span></p></td>";
             try {
                 //string headerSpan = @"<p class=MsoNormal><span style='font-size:12.0pt;font-family:Consolas;color:blue;mso-fareast-language:TR'>";
-                string tableHeader = Resources.tableHeader.Replace("01.08.19 - 11:07", DateTime.Now.ToString("dd/MM/yy - HH:mm"));
+                string tableHeader = "TABLE HEADER"; //Resources.tableHeader.Replace("01.08.19 - 11:07", DateTime.Now.ToString("dd/MM/yy - HH:mm"));
                 List <string> excelRows = new List<string>();
-                foreach (List<string> row in orderedRows) {
+                foreach (Result result in results) {
                     var rowData = "";
-                    foreach (string data in row) {
-                        int i = row.FindIndex(rr => rr == data);
-                        if (i == 0 || i == 3 || i == 5 || i == 7){
-                            rowData +=
-                                @"<td width=130 nowrap valign=bottom style='width:97.75pt;border:none;border-right:2px solid;height:15.0pt'>
-                                <p class=MsoNormal><span style='font-family:Calibri;mso-fareast-language:TR'>" + data + @"<o:p></o:p></span></p></td>";
-                        }
-                        else
-                            rowData +=
-                                @"<td width=130 nowrap valign=bottom style='width:97.75pt;border:none;height:15.0pt'>
-                                <p class=MsoNormal><span style='font-family:Calibri;mso-fareast-language:TR'>" + data + @"<o:p></o:p></span></p></td>";
-                    }
-                    excelRows.Add("<tr style='mso-yfti-irow:2;height:15.0pt'> " + rowData + "</tr>");
+                    result.ToArray().ToList().ForEach(rr => rowData += cellProperty + rr + cellEnd);
+                    excelRows.Add("<tr style='mso-yfti-irow:2;height:15.0pt'> " + rowData + "</tr>"); // a table raw created
                 }
-                resultTable = tableHeader + String.Join("", excelRows) + "</table>";
+                resultTable = tableHeader + String.Join("", excelRows) + "</table>"; // end of the creating table
             }
             catch (System.Exception ee) {
                 Console.Write("\n Creating table for mailing is failed . . . ", Color.Red);
                 Console.Write("\n Exception: " + ee.Message, Color.Orange);
                 resultTable = "No Table Created";
             }
-            OutlookApp.Application OutApp  = new OutlookApp.Application();
-            OutlookApp.MailItem mailItem = (OutlookApp.MailItem)OutApp.CreateItem(OutlookApp.OlItemType.olMailItem);
-            mailItem.Importance = OutlookApp.OlImportance.olImportanceHigh;
+            Outlook.Application OutApp  = new Outlook.Application();
+            MailItem mailItem = (MailItem)OutApp.CreateItem(OlItemType.olMailItem);
+            mailItem.Importance = OlImportance.olImportanceHigh;
             mailItem.Subject = "Scanning IP Addresses";
             // "pre" tag is standing for render as it is dont change anything, thats why we cannot tab on there
-            mailItem.HTMLBody =
-"<pre " + "style=\"font-family:'Arial TUR'\" >" +
-@"Merhaba,<br/>
+            mailItem.HTMLBody = "<pre " + "style=\"font-family:'Arial TUR'\" >" + @"Merhaba,<br/>
 Ekteki Scanning IP raporlarına istinaden aşağıdaki <strong style='color:red;'>kırmızı olmayan IP'lerin</strong> erişimi blissadmin ile kesilmiştir.<br/>
-Syg.<br/>
-" + resultTable + "</pre>";
+Syg.<br/><br/>" + resultTable + "</pre>";
 
             mailItem.To = MainClass.speconfig.csirtMail + "," + MainClass.speconfig.altyapiMail;
             //mailItem.CC = MainClass.speconfig.atarMail;
@@ -357,13 +352,10 @@ Syg.<br/>
             }
             mailItem.Display();
         }
-        static public void WriteAtarMail(List<List<string>> rows) {
-            var orderedRows = rows.OrderBy(ss => ss[5]).ToList();
+        static public void WriteAtarMail(List<Result> results) {
             // finally, write rows list to Excel's rows 
-            foreach (List<string> row in orderedRows) {
-            }
-            string mailBody = String.Join("", orderedRows.Select(rr => rr[0] + "<br/>"));
-            OApp outlookApp = new OApp();
+            string mailBody = String.Join("", results.Select(rr => rr.ip + "<br/>"));
+            Outlook.Application outlookApp = new Outlook.Application();
             MailItem mailItem = outlookApp.CreateItem(OlItemType.olMailItem);
             mailItem.To = MainClass.speconfig.atarMail;
             mailItem.CC = MainClass.speconfig.csirtMail;

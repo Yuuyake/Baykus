@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace BAYKUS {
+namespace Baykus
+{
     public partial class Config {
         [JsonProperty("proxyAdress")]
         public string proxyAdress { get; set; }

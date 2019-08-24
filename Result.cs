@@ -1,58 +1,138 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HashChecker {
+namespace Baykus
+{
     public class Result {
         // you can think this holds all raw info in output files
         public int orderNo;
+        public bool isCompleted;
         public string ip;
-        public string ibmCountry;
-        public string ibmAsn;
-        public string ibmSeverity;
-        public string ipapiOrgz;
-        public string ipapiCountry;
-        public string mdBlacklist;
-        public string ntBlocklist;
-        public bool isCompleted = false;
-        public Result(int orderNo, string ip, string ibmRaw, string mdRaw, string ntRaw, string ipapiRaw) {
+        public List<string> ibmResult;   // error,country,asn,severity
+        public List<string> ipapiResult; // error,country,org,"NA"
+        public List<string> mdResult;    // error,blacklist,"NA","NA"
+        public List<string> ntResult;    // error,blocklist,"NA","NA"
+
+        public Result(int orderNo = -1, string ip = "NA", string ibmRaw = "NA", string ipapiRaw = "NA", string mdRaw = "NA", string ntRaw = "NA") {
             // IBM, MD vs hepsi ayrı ayrı resolve ve sonuçları buraya getir
             this.orderNo = orderNo;
             this.ip = ip;
+            this.isCompleted = false;
 
-            this.ibmCountry  = ResolveIbmData(ibmRaw)[0];
-            this.ibmAsn      = ResolveIbmData(ibmRaw)[1];
-            this.ibmSeverity = ResolveIbmData(ibmRaw)[2];
-
-            this.ipapiOrgz    = ResolveIpapiData(ipapiRaw)[1];
-            this.ipapiCountry = ResolveIpapiData(ipapiRaw)[2];
-
-            this.mdBlacklist = ResolveMdData(mdRaw)[0];
-            this.ntBlocklist = ResolveNtData(ntRaw)[0]; 
+            ibmResult   = ResolveIbmData(ibmRaw);
+            ipapiResult = ResolveIpapiData(ipapiRaw);
+            mdResult    = ResolveMdData(mdRaw);
+            ntResult    = ResolveNtData(ntRaw);
         }
+        private List<string> ResolveNtData(string ntRaw)
+        {
+            throw new NotImplementedException();
+        }
+        private List<string> ResolveMdData(string mdRaw)
+        {
+            throw new NotImplementedException();
+        }
+        private List<string> ResolveIpapiData(string ipapiRaw)
+        {
+            throw new NotImplementedException();
+        }
+        /// <summary>
+        /// returns 4 sized string list: country,asn(organization),severity,error
+        /// </summary>
+        /// <param name="ibmRaw"></param>
+        /// <returns></returns>
+        private List<string> ResolveIbmData(string ibmRaw)
+        {
+            string country  = "NA";
+            string asn      = "NA";
+            string severity = "NA";
+            string error    = "NA";
+            string apiName = "ibm-xforce";
+            if (ibmRaw.Contains("error") && ibmRaw.Contains("code"))
+            {
+                error = "ibmerror";
+                MainClass.printers[orderNo].Add(Helpers.printBad(apiName, error, ibmRaw.ToString()));
+            }
+            else if (ibmRaw == null)
+            {
+                error = "null returned";
+                MainClass.printers[orderNo].Add(Helpers.printBad(apiName, error, ibmRaw.ToString()));
+            }
+            else
+            {
+                try
+                {
+                    // process the response
+                    dynamic retIBMjson = JsonConvert.DeserializeObject(ibmRaw);
+                    country = retIBMjson.geo.country.ToString() ?? "??";
+                    severity = retIBMjson.score.ToString() ?? "??";
+                    var asns = retIBMjson.history.Last.asns;
+                    // because of that we do not know the number that represents asns, foreach necessarry. Look data resultIBM.json 
+                    try
+                    {
+                        foreach (var tAsn in asns)
+                        {
+                            asn = tAsn.First.Company.ToString();
+                            if (asn.LastIndexOf("-") != -1) {
+                                asn = asn.Substring(0, asn.LastIndexOf("-"));
+                                int len = asn.Length - 4 >= 0 ? asn.Length : 0;
+                                asn = asn.Substring(0, len);
+                            }
+                            break;
+                        }
+                    }
+                    catch
+                    {
+                        asn = "??";
+                        error = "asnExcepton";
+                        MainClass.printers[orderNo].Add(Helpers.printBad(apiName, "exception when parsing", "ASNS,company"));
+                    }
+                    MainClass.printers[orderNo].Add(Helpers.printOk(apiName));
+                }
+                catch (Exception e)
+                {
+                    MainClass.printers[orderNo].Add(Helpers.printBad(apiName, "exception when parsing", e.Message));
+                    if (e.Message.Contains("Forbidden"))
+                    {
+                        MainClass.ibmApiKeys[currKeyCounter].state = "KeyLimit";
+                        error = "KeyLimit";
+                    }
+                    else
+                        error = "exception";
 
+                }
+            }
+            return new List<string>() { error, country, asn, severity }; // if any fail happens, instruction comes to here to return properly
+        }
         public override string ToString() {
             return
                 " [" + ip.PadRight(20) + "] " +
-                ibmCountry.PadRight(10) +
-                ibmAsn.PadRight(15) +
-                ibmSeverity.PadRight(5) +
-                ipapiCountry.PadRight(10) +
-                ipapiOrgz.PadRight(15) +
-                mdBlacklist.PadRight(15) +
-                ntBlocklist.PadRight(15);
+                ibmResult[1].PadRight(10) +
+                ibmResult[2].PadRight(15) +
+                ibmResult[3].PadRight(5) +
+                ipapiResult[1].PadRight(10) +
+                ipapiResult[2].PadRight(15) +
+                mdResult[1].PadRight(15) +
+                ntResult[1].PadRight(15);
         }
         public string DashPrint() {
             return
-                ibmCountry.PadRight(10) +
-                ibmAsn.PadRight(15) +
-                ibmSeverity.PadRight(5) +
-                ipapiCountry.PadRight(10) +
-                ipapiOrgz.PadRight(15) +
-                mdBlacklist.PadRight(15) +
-                ntBlocklist.PadRight(15);
+                ibmResult[1].PadRight(10) +
+                ibmResult[2].PadRight(15) +
+                ibmResult[3].PadRight(5) +
+                ipapiResult[1].PadRight(10) +
+                ipapiResult[2].PadRight(15) +
+                mdResult[1].PadRight(15) +
+                ntResult[1].PadRight(15);
+        }
+
+        public string[] ToArray()
+        {
+            return ibmResult.Concat(ipapiResult).Concat(mdResult).Concat(ntResult).ToArray();
         }
     }
 }
