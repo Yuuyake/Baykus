@@ -99,17 +99,17 @@ namespace Baykus
         /// <param name="IP"></param>
         /// <param name="f"></param>
         /// <returns></returns>
-        static public List<string> ExecuteWithTimeLimit(TimeSpan timeSpan, WebProxy myP , string IP, Func<string,int,List<string>> f) {
-            List<string> temp = new List<string>();
+        static public string ExecuteWithTimeLimit(TimeSpan timeSpan, WebProxy myP , string IP, Func<string,int,string> f) {
+            string temp = "NA";
             try {
                 Task task = Task.Factory.StartNew(() => temp = f(IP,1));
                 if (task.Wait(timeSpan) == true) 
                     return temp;
-                temp = new List<string> { "?", "?" };
+                temp = "?";
             }
             catch (AggregateException ae) {
-                temp = new List<string> { "?", "?" };
-                Console.WriteFormatted(" >> Failing to connect IP-api with given time", Color.Green);
+                temp = "?";
+                Console.WriteFormatted(" >> Failing to connect IP-api with given time: \n\t" + ae.Message, Color.Green);
             }
             return temp;
         }

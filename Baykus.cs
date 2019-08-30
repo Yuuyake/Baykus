@@ -53,7 +53,7 @@ namespace Baykus {
             var largestW = Console.LargestWindowWidth / 2;
             string banner = 
                 " ".PadRight(largestW) +
-                String.Concat(Resources.banner.Split('\n').Select(ss => ss = ss +
+                String.Concat(Resources.owlBanner.Split('\n').Select(ss => ss = ss +
                 " ".PadRight(largestW - ss.Length) + '\n')).Replace("\r", "") +
                 " ".PadRight(largestW) + '\n';
             Console.Title = "BAYKUS";
@@ -73,7 +73,7 @@ namespace Baykus {
             List<string> IPs = Helpers.getReportedIPs();// read reported IPs from csv
             myProxySetting = initializeProxyConfigs();
             AsyncRequests(IPs);                         // this will make all needed requests from all APIs asynchronously
-            results = results.OrderBy(ss => ss.ipapiResult[2]).ToList();
+            results = results.OrderBy(ss => ss.ip_apiResult.country).ToList();
             Helpers.writeRowsToExcel(results);             // responses wrote to the rows List variable, write them to report excel
             Helpers.WriteSomeMail(results);
             Helpers.WriteAtarMail(results);
@@ -108,7 +108,7 @@ namespace Baykus {
                 Console.Write("\n │\t├─ Password: ");
                 securePwd = Helpers.darker(); // ask and save user password on the quiet
                 myProxySetting.Credentials = new NetworkCredential(userName, securePwd);
-                List<string> tempResult = Helpers.ExecuteWithTimeLimit(TimeSpan.FromMilliseconds(2000), myProxySetting, "1.1.1.1", makeRequestIp_api);
+                var tempResult = Helpers.ExecuteWithTimeLimit(TimeSpan.FromMilliseconds(2000), myProxySetting, "1.1.1.1", makeRequestIp_api);
                 if (tempResult[0] == "FailProxyPass")
                     Console.WriteFormatted("\n │\t\t\tProbably wrong password..", Color.Red);
                 else {
@@ -154,11 +154,11 @@ namespace Baykus {
         /// <returns></returns>
         static Result OneIpRequests(string ip,int counter) {
             Result tResult = new Result(counter, ip);
-            string rawIbm    = "NA";
-            string rawIpapi  = "NA";
-            string rawIp_api = "NA";
-            string rawMd     = "NA";
-            string rawNt  = "NA";
+            string rawIbm    = "!NA!";
+            string rawIpapi  = "!NA!";
+            string rawIp_api = "!NA!";
+            string rawMd     = "!NA!";
+            string rawNt  = "!NA!";
 
             //get api RESPONSES from requests asynchronous, choose whatever  
             //var taskIPAPI = Task.Run(() => rawIpapi  = makeRequestIpapi(IP,counter));
@@ -189,7 +189,7 @@ namespace Baykus {
         static string makeRequestIp_api(string IP, int counter) {
             string apiName = "ip-api";
             List<string> tempRow = new List<string>();
-            string responseIP_API = "NA";
+            string responseIP_API = "!NA!";
             try {   // create request , read response
                 HttpWebRequest requestIP_API = (HttpWebRequest)WebRequest.Create("http://ip-api.com/json/" + IP);
                 requestIP_API.Proxy = myProxySetting;
@@ -284,8 +284,7 @@ namespace Baykus {
                 catch (Exception e) {
                     printers[counter].Add(Helpers.printBad("ibm-xforce", "exception", e.Message));
                 }
-                /////////////
-                return responseIBM;
+                break;
             }
             return responseIBM;
         }
@@ -295,7 +294,7 @@ namespace Baykus {
         /// <param name="IP"></param>
         /// <param name="counter"></param>
         /// <returns></returns>
-        static List<string> makeRequestMDef(string IP, int counter) {
+        static string makeRequestMDef(string IP, int counter) {
             int currKeyCounter = 0;
             string apiName = "metadefender";
             string responseMDef = "";
@@ -323,29 +322,9 @@ namespace Baykus {
                         continue;
                     }
                 }
-                if (responseMDef.Contains("error") && responseMDef.Contains("code"))
-                    printers[counter].Add(Helpers.printBad(apiName, "error", responseMDef));
-                else if (responseMDef == null)
-                    printers[counter].Add(Helpers.printBad(apiName, "null returned", responseMDef.ToString()));
-                else {
-                    try {
-                        // process the response
-                        dynamic retMDjson = JsonConvert.DeserializeObject(responseMDef);
-                        //Console.Write("\n" + JsonConvert.SerializeObject(retMDjson, Formatting.Indented) + "\n");
-                        // add values to row > count,listOfBlacklists
-                        tempRow.Add(retMDjson.detected_by.ToString() + " |");
-                        foreach (var item in retMDjson.scan_results)
-                            if (item.results.First.result.ToString() == "blacklisted")
-                                tempRow[tempRow.Count - 1] = tempRow.Last() + ", " + item.source.ToString();
-                        printers[counter].Add(Helpers.printOk(apiName));
-                        return tempRow;
-                    }
-                    catch (Exception e) {
-                        printers[counter].Add(Helpers.printBad(apiName, "exception when parsing", e.Message));
-                    }
-                }
+                break;
             }
-            return new List<string>() { "!KeyLimit!" };
+            return responseMDef;
         }
         /// <summary>
         /// see\Resources\resultNtrno.json
@@ -353,7 +332,7 @@ namespace Baykus {
         /// <param name="IP"></param>
         /// <param name="counter"></param>
         /// <returns></returns>
-        static List<string> makeRequestNtrno(string IP, int counter) {
+        static string makeRequestNtrno(string IP, int counter) {
             int currKeyCounter = 0;
             string apiName = "neutrino";
             string responseNtrno = "";
@@ -384,32 +363,9 @@ namespace Baykus {
                         continue;
                     }
                 }
-                if (responseNtrno.Contains("error") && responseNtrno.Contains("code")) {
-                    printers[counter].Add(Helpers.printBad(apiName, "error", responseNtrno.ToString()));
-                }
-                else if (responseNtrno == null)
-                    printers[counter].Add(Helpers.printBad(apiName, "null returned", responseNtrno.ToString()));
-                else {
-                    try {
-                        //process the response
-                        JsonObject retNtrnoJson = (JsonObject)JsonValue.Parse(responseNtrno);
-                        //add response values to row cell > blocklisted 
-                        tempRow.Add(retNtrnoJson["list-count"].ToString() + " | "
-                            + String.Join("", retNtrnoJson["blocklists"].ToString().Split('[', ']', '"')));
-                        printers[counter].Add(Helpers.printOk(apiName));
-                        return tempRow;
-                    }
-                    catch (Exception e) {
-                        printers[counter].Add(Helpers.printBad(apiName, "exception when parsing", e.Message));
-                        if (e.Message.Contains("The given key was not present in the dictionary") == true) {
-                            ntApiKeys[currKeyCounter].state = "KeyLimit";
-                            continue;
-                        }
-                    }
-                }
-                return new List<string>() { "?" };
+                break;                
             }
-            return new List<string>() { "KeyLimit" };
+            return responseNtrno;
         }
     }
 }
