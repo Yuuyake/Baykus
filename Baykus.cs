@@ -158,7 +158,7 @@ namespace Baykus {
             string rawIpapi  = "!NA!";
             string rawIp_api = "!NA!";
             string rawMd     = "!NA!";
-            string rawNt  = "!NA!";
+            string rawNt     = "!NA!";
 
             //get api RESPONSES from requests asynchronous, choose whatever  
             //var taskIPAPI = Task.Run(() => rawIpapi  = makeRequestIpapi(IP,counter));

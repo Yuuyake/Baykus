@@ -76,7 +76,8 @@ namespace Baykus
         /// </summary>
         /// <param name="apiName"></param>
         /// <returns></returns>
-        static public string printOk(string apiName) { // to edit easier because of it is printed many time 
+        static public string printOk(string apiName) { 
+            // to edit easier because of it is printed many time 
             //Console.WriteFormatted("\n │\t├─ " + apiName + " OK", Color.Green);
             return "\n │\t├─ " + apiName + " OK";
         }
@@ -87,7 +88,8 @@ namespace Baykus
         /// <param name="problem"></param>
         /// <param name="msg"></param>
         /// <returns></returns>
-        static public string printBad(string api, string problem, string msg) { // to edit easier because of it is printed many time 
+        static public string printBad(string api, string problem, string msg) { 
+            // to edit easier because of it is printed many time 
             //Console.WriteFormatted("\n │\t├─ !" + api + " bad " + problem + ": " + msg, green);
             return "\n │\t├─ !" + api + " bad " + problem + ": " + msg;
         }
@@ -244,28 +246,18 @@ namespace Baykus
                     Console.Write("\n\n │ System has excel installed.");
                     Console.Write("\n │\t├─ >> Writing responses to excel ...");
                     using (ExcelPackage excel = new ExcelPackage()) {
-                        var headerRow = new List<string[]>() { new string[] { DateTime.Now.ToString("dd/MM/yy - HH:mm"), "IBM-XFORCE", " ", " ", "IPAPI", " ", "METADEFENDER", "NEUTRINO" } };
-                        var headerRow2 = new List<string[]>() { new string[] {
-                            "IP",
-                            "IBM-Country",
-                            "ASN",
-                            "Severity(1-10)",
-                            "Organization",
-                            "IPapi-Country",
-                            "Blacklisted",
-                            "Blocklisted"
-                            }
-                        };
+                        var headerRow1 = new List<string[]>() { new string[] { DateTime.Now.ToString("dd/MM/yy - HH:mm"), "IBM-XFORCE", " ", " ", "IPAPI", " ", "METADEFENDER", "NEUTRINO" } };
+                        var headerRow2 = new List<string[]>() { new string[] { "IP", "IBM-Country", "ASN", "Severity(1-10)", "Organization", "IPapi-Country", "Blacklisted", "Blocklisted" } };
                         // Determine the header range to write over it (e.g. A1:D1)
-                        string headerRange = "A1:H1";
+                        string headerRange1 = "A1:H1";
                         string headerRange2 = "A2:H2";
                         // Target a worksheet
                         excel.Workbook.Worksheets.Add("IP Reputations");
                         var worksheet = excel.Workbook.Worksheets["IP Reputations"];
                         // Populate the cells
-                        worksheet.Cells[headerRange].LoadFromArrays(headerRow);
-                        worksheet.Cells[headerRange].Style.Font.Size = 12;
-                        worksheet.Cells[headerRange].Style.Font.Color.SetColor(System.Drawing.Color.Blue);
+                        worksheet.Cells[headerRange1].LoadFromArrays(headerRow1);
+                        worksheet.Cells[headerRange1].Style.Font.Size = 12;
+                        worksheet.Cells[headerRange1].Style.Font.Color.SetColor(System.Drawing.Color.Blue);
 
                         worksheet.Cells[headerRange2].LoadFromArrays(headerRow2);
                         worksheet.Cells[headerRange2].Style.Font.Bold = true;
